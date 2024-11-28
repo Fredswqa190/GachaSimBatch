@@ -26,12 +26,23 @@ class MyApp(object):
         
         self.button_frame = Frame(self.main_frame)
         self.button_frame.pack(side=BOTTOM)
+
         self.roll1button = Button(self.button_frame, text="1 Pull", \
                                  command = self.roll_one)
         self.roll1button.pack(side=LEFT)
+
         self.roll10button = Button(self.button_frame, text="10 Pull", \
                                  command = self.roll_ten)
         self.roll10button.pack(side=LEFT)
+
+        self.displayChars = Button(self.button_frame, text="Characters", \
+                                 command = self.display_characters)
+        self.displayChars.pack(side=LEFT)
+
+        self.displayHist = Button(self.button_frame, text="History", \
+                                 command = self.display_history)
+        self.displayHist.pack(side=LEFT)
+
         self.quitbutton = Button(self.button_frame, text="Quit", \
                                  command = self.quit)
         self.quitbutton.pack(side=RIGHT)
@@ -41,7 +52,6 @@ class MyApp(object):
         self.next = Button(self.button_frame, text="Next", \
                                  command = self.intro)
         
-
     def quit(self):
         self.parent.destroy()
     
@@ -54,11 +64,33 @@ class MyApp(object):
         self.quitbutton.pack_forget()
         self.mainmenu.pack_forget()
         self.next.pack_forget()
+        self.displayChars.pack_forget()
+        self.displayHist.pack_forget()
 
     def show_buttons(self):
         self.roll1button.pack(side=LEFT)
         self.roll10button.pack(side=LEFT)
+        self.displayChars.pack(side=LEFT)
+        self.displayHist.pack(side=LEFT)
         self.quitbutton.pack(side=RIGHT)
+
+    def display_characters(self):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.display_characters)
+            return
+        
+        self.hide_buttons()
+        self.mainmenu.pack()
+    
+    def display_history(self):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.display_history)
+            return
+        
+        self.hide_buttons()
+        self.mainmenu.pack()
 
     def update_gif(self, frame, img, canvas_img, stop):
         if self.stop_animation:
