@@ -15,30 +15,50 @@ class MyApp(object):
                              width=self.width, height=self.height)
         self.canvas.pack()
 
+        self.pause = 1
+
         self.stop_animation = False
         self.max_rolls = 0
         self.count_rolls = 0
+
+        self.wishes = 90
+        self.characters = []
         
         self.button_frame = Frame(self.main_frame)
         self.button_frame.pack(side=BOTTOM)
-        self.drawbutton = Button(self.button_frame, text="1 Pull", \
+        self.roll1button = Button(self.button_frame, text="1 Pull", \
                                  command = self.roll_one)
-        self.drawbutton.pack(side=LEFT)
-        self.drawbutton = Button(self.button_frame, text="10 Pull", \
+        self.roll1button.pack(side=LEFT)
+        self.roll10button = Button(self.button_frame, text="10 Pull", \
                                  command = self.roll_ten)
-        self.drawbutton.pack(side=LEFT)
-        self.quitbutton = Button(self.button_frame, text="Main Menu", \
-                                 command = self.main_menu)
-        self.quitbutton.pack(side=RIGHT)
+        self.roll10button.pack(side=LEFT)
         self.quitbutton = Button(self.button_frame, text="Quit", \
                                  command = self.quit)
         self.quitbutton.pack(side=RIGHT)
+
+        self.mainmenu = Button(self.button_frame, text="Main Menu", \
+                                 command = self.main_menu)
+        self.next = Button(self.button_frame, text="Next", \
+                                 command = self.intro)
+        
 
     def quit(self):
         self.parent.destroy()
     
     def rand_num(self):
         return 1
+    
+    def hide_buttons(self):
+        self.roll1button.pack_forget()
+        self.roll10button.pack_forget()
+        self.quitbutton.pack_forget()
+        self.mainmenu.pack_forget()
+        self.next.pack_forget()
+
+    def show_buttons(self):
+        self.roll1button.pack(side=LEFT)
+        self.roll10button.pack(side=LEFT)
+        self.quitbutton.pack(side=RIGHT)
 
     def update_gif(self, frame, img, canvas_img, stop):
         if self.stop_animation:
@@ -68,10 +88,17 @@ class MyApp(object):
     def main_menu(self):
         self.stop_animation = True
         if self.canvas.find_all():
-            self.parent.after(2, self.main_menu)
+            self.parent.after(self.pause, self.main_menu)
             return
         
+        self.mainmenu.pack_forget()
+        self.show_buttons()
+
+        self.count_rolls = 0
+        
         [canvas_img, img] = self.animate("./mainmenu.gif")
+        self.canvas.create_text(0, 500, text="Remaining wishes: "+str(self.wishes), font=('Helvetica', 20), fill="blue")
+        
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
         
@@ -87,13 +114,16 @@ class MyApp(object):
         
     # buttons shouldn't be visible
     def intro(self):
+        self.stop_animation = True
         if self.canvas.find_all():
-            self.parent.after(2, self.intro)
+            self.parent.after(self.pause, self.intro)
             return
         
+        self.hide_buttons()
         num = self.rand_num() # determines which intro and which character
         [canvas_img, img] = self.animate("./intro1.gif")
         self.count_rolls += 1
+        self.wishes -= 1
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
@@ -115,11 +145,14 @@ class MyApp(object):
 
     def repeat(self, num):
         if self.canvas.find_all():
-            self.parent.after(2, self.repeat, num)
+            self.parent.after(self.pause, self.repeat, num)
             return
+        
+        if self.max_rolls == self.count_rolls:
+            self.mainmenu.pack()
+        else:
+            self.next.pack()
 
-        # on-click event -> main menu or next character intro
-        # if max_rolls == count_rolls -> main menu
         [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
