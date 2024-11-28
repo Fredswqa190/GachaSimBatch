@@ -52,6 +52,8 @@ class MyApp(object):
         self.next = Button(self.button_frame, text="Next", \
                                  command = self.intro)
         
+        self.main_menu()
+        
     def quit(self):
         self.parent.destroy()
     
