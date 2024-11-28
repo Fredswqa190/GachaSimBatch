@@ -22,7 +22,7 @@ class MyApp(object):
         self.count_rolls = 0
 
         self.wishes = 90
-        self.characters = []
+        self.characters = {1:0} # {1:0, 2:0, 3:0}
         
         self.button_frame = Frame(self.main_frame)
         self.button_frame.pack(side=BOTTOM)
@@ -43,6 +43,10 @@ class MyApp(object):
                                  command = self.display_history)
         self.displayHist.pack(side=LEFT)
 
+        self.rulesbutton = Button(self.button_frame, text="Rules", \
+                                 command = self.rules)
+        self.rulesbutton.pack(side=LEFT)
+
         self.quitbutton = Button(self.button_frame, text="Quit", \
                                  command = self.quit)
         self.quitbutton.pack(side=RIGHT)
@@ -51,6 +55,8 @@ class MyApp(object):
                                  command = self.main_menu)
         self.next = Button(self.button_frame, text="Next", \
                                  command = self.intro)
+        self.back = Button(self.button_frame, text="Back", \
+                                 command = self.display_characters)
         
         self.main_menu()
         
@@ -68,31 +74,16 @@ class MyApp(object):
         self.next.pack_forget()
         self.displayChars.pack_forget()
         self.displayHist.pack_forget()
+        self.back.pack_forget()
+        self.rulesbutton.pack_forget()
 
     def show_buttons(self):
         self.roll1button.pack(side=LEFT)
         self.roll10button.pack(side=LEFT)
         self.displayChars.pack(side=LEFT)
         self.displayHist.pack(side=LEFT)
+        self.rulesbutton.pack(side=LEFT)
         self.quitbutton.pack(side=RIGHT)
-
-    def display_characters(self):
-        self.stop_animation = True
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.display_characters)
-            return
-        
-        self.hide_buttons()
-        self.mainmenu.pack()
-    
-    def display_history(self):
-        self.stop_animation = True
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.display_history)
-            return
-        
-        self.hide_buttons()
-        self.mainmenu.pack()
 
     def update_gif(self, frame, img, canvas_img, stop):
         if self.stop_animation:
@@ -109,7 +100,7 @@ class MyApp(object):
             self.canvas.delete("all")
             self.stop_animation = False
             return
-        self.parent.after(10, self.update_gif, (frame + 1) % img.n_frames, img, canvas_img, stop)
+        self.parent.after(33, self.update_gif, (frame + 1) % img.n_frames, img, canvas_img, stop) # around 30 fps
 
     def animate(self, pathname):
         img = Image.open(pathname)
@@ -146,7 +137,6 @@ class MyApp(object):
         self.max_rolls = 10
         self.intro()
         
-    # buttons shouldn't be visible
     def intro(self):
         self.stop_animation = True
         if self.canvas.find_all():
@@ -158,6 +148,7 @@ class MyApp(object):
         [canvas_img, img] = self.animate("./intro1.gif")
         self.count_rolls += 1
         self.wishes -= 1
+        self.characters[num] += 1
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
@@ -188,6 +179,69 @@ class MyApp(object):
             self.next.pack()
 
         [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
+        self.stop_animation = False
+        self.update_gif(0, img, canvas_img, False)
+
+    def display_char(self, num):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.display_char, num)
+            return
+        
+        self.mainmenu.pack_forget()
+        self.back.pack()
+        [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
+        self.stop_animation = False
+        self.update_gif(0, img, canvas_img, False)
+
+    def display_characters(self):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.display_characters)
+            return
+        
+        self.hide_buttons()
+        self.mainmenu.pack()
+
+        [canvas_img, img] = self.animate("./background.gif")
+
+        text = self.canvas.create_text(200, 100, text="character 1", font=('Helvetica', 20), fill="white", anchor=CENTER)
+        self.canvas.tag_bind(text, "<Button-1>", lambda event: self.display_char(1))
+
+        self.stop_animation = False
+        self.update_gif(0, img, canvas_img, False)
+    
+    def display_history(self):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.display_history)
+            return
+        
+        self.hide_buttons()
+        self.mainmenu.pack()
+
+        [canvas_img, img] = self.animate("./background.gif")
+
+        for i in range(1):
+            num = self.characters[i+1]
+            self.canvas.create_text(200, (i+1)*100, text="character "+str(i+1)+": "+str(num), font=('Helvetica', 20), fill="white", anchor=CENTER)
+
+        self.stop_animation = False
+        self.update_gif(0, img, canvas_img, False)
+
+    def rules(self):
+        self.stop_animation = True
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.rules)
+            return
+        
+        self.hide_buttons()
+        self.mainmenu.pack()
+
+        [canvas_img, img] = self.animate("./background.gif")
+
+        # Rules
+
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
