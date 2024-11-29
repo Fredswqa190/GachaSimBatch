@@ -1,11 +1,11 @@
 from tkinter import *
 from PIL import Image, ImageTk
-import time
 
 class MyApp(object):
     def __init__(self, parent):
-        self.width = 600
-        self.height = 600
+        self.width = root.winfo_screenwidth()
+        self.height = root.winfo_screenheight()
+
         self.parent = parent
         self.main_frame = Frame(parent)
         self.main_frame.pack()
@@ -23,40 +23,34 @@ class MyApp(object):
 
         self.wishes = 90
         self.characters = {1:0} # {1:0, 2:0, 3:0}
-        
-        self.button_frame = Frame(self.main_frame)
-        self.button_frame.pack(side=BOTTOM)
 
-        self.roll1button = Button(self.button_frame, text="1 Pull", \
-                                 command = self.roll_one)
-        self.roll1button.pack(side=LEFT)
+        self.increment = int(self.width/7)
+        self.button_height = self.height-100
 
-        self.roll10button = Button(self.button_frame, text="10 Pull", \
-                                 command = self.roll_ten)
-        self.roll10button.pack(side=LEFT)
+        self.roll1button = Button(text="1 Pull", \
+                                 width=20, height=2, command = self.roll_one)
 
-        self.displayChars = Button(self.button_frame, text="Characters", \
-                                 command = self.display_characters)
-        self.displayChars.pack(side=LEFT)
+        self.roll10button = Button(text="10 Pull", \
+                                 width=20, height=2, command = self.roll_ten)
 
-        self.displayHist = Button(self.button_frame, text="History", \
-                                 command = self.display_history)
-        self.displayHist.pack(side=LEFT)
+        self.displayChars = Button(text="Characters", \
+                                 width=20, height=2, command = self.display_characters)
 
-        self.rulesbutton = Button(self.button_frame, text="Rules", \
-                                 command = self.rules)
-        self.rulesbutton.pack(side=LEFT)
+        self.displayHist = Button(text="History", \
+                                 width=20, height=2, command = self.display_history)
 
-        self.quitbutton = Button(self.button_frame, text="Quit", \
-                                 command = self.quit)
-        self.quitbutton.pack(side=RIGHT)
+        self.rulesbutton = Button(text="Rules", \
+                                 width=20, height=2, command = self.rules)
 
-        self.mainmenu = Button(self.button_frame, text="Main Menu", \
-                                 command = self.main_menu)
-        self.next = Button(self.button_frame, text="Next", \
-                                 command = self.intro)
-        self.back = Button(self.button_frame, text="Back", \
-                                 command = self.display_characters)
+        self.quitbutton = Button(text="Quit", \
+                                 width=20, height=2, command = self.quit)
+
+        self.mainmenu = Button(text="Main Menu", \
+                                 width=20, height=2, command = self.main_menu)
+        self.next = Button(text="Next", \
+                                 width=20, height=2, command = self.intro)
+        self.back = Button(text="Back", \
+                                 width=20, height=2, command = self.display_characters)
         
         self.main_menu()
         
@@ -67,23 +61,23 @@ class MyApp(object):
         return 1
     
     def hide_buttons(self):
-        self.roll1button.pack_forget()
-        self.roll10button.pack_forget()
-        self.quitbutton.pack_forget()
-        self.mainmenu.pack_forget()
-        self.next.pack_forget()
-        self.displayChars.pack_forget()
-        self.displayHist.pack_forget()
-        self.back.pack_forget()
-        self.rulesbutton.pack_forget()
+        self.roll1button.place_forget()
+        self.roll10button.place_forget()
+        self.quitbutton.place_forget()
+        self.mainmenu.place_forget()
+        self.next.place_forget()
+        self.displayChars.place_forget()
+        self.displayHist.place_forget()
+        self.back.place_forget()
+        self.rulesbutton.place_forget()
 
     def show_buttons(self):
-        self.roll1button.pack(side=LEFT)
-        self.roll10button.pack(side=LEFT)
-        self.displayChars.pack(side=LEFT)
-        self.displayHist.pack(side=LEFT)
-        self.rulesbutton.pack(side=LEFT)
-        self.quitbutton.pack(side=RIGHT)
+        self.roll1button.place(x=self.increment, y=self.button_height, anchor="center")
+        self.roll10button.place(x=2*self.increment, y=self.button_height, anchor="center")
+        self.displayChars.place(x=3*self.increment, y=self.button_height, anchor="center")
+        self.displayHist.place(x=4*self.increment, y=self.button_height, anchor="center")
+        self.rulesbutton.place(x=5*self.increment, y=self.button_height, anchor="center")
+        self.quitbutton.place(x=6*self.increment, y=self.button_height, anchor="center")
 
     def update_gif(self, frame, img, canvas_img, stop):
         if self.stop_animation:
@@ -92,7 +86,8 @@ class MyApp(object):
             return
 
         img.seek(frame)  # Move to the next frame
-        update = ImageTk.PhotoImage(img)
+        resize_img = img.resize((self.width, self.height))
+        update = ImageTk.PhotoImage(resize_img)
         self.canvas.itemconfig(canvas_img, image=update)
         self.canvas.image = update
 
@@ -104,7 +99,8 @@ class MyApp(object):
 
     def animate(self, pathname):
         img = Image.open(pathname)
-        img_tk = ImageTk.PhotoImage(img)
+        resize_img = img.resize((self.width, self.height))
+        img_tk = ImageTk.PhotoImage(resize_img)
         canvas_img = self.canvas.create_image(0, 0, anchor=NW, image=img_tk)
         self.canvas.image = img_tk
 
@@ -112,11 +108,11 @@ class MyApp(object):
     
     def main_menu(self):
         self.stop_animation = True
+        self.mainmenu.place_forget()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.main_menu)
             return
         
-        self.mainmenu.pack_forget()
         self.show_buttons()
 
         self.count_rolls = 0
@@ -139,11 +135,11 @@ class MyApp(object):
         
     def intro(self):
         self.stop_animation = True
+        self.hide_buttons()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.intro)
             return
         
-        self.hide_buttons()
         num = self.rand_num() # determines which intro and which character
         [canvas_img, img] = self.animate("./intro1.gif")
         self.count_rolls += 1
@@ -174,9 +170,9 @@ class MyApp(object):
             return
         
         if self.max_rolls == self.count_rolls:
-            self.mainmenu.pack()
+            self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
         else:
-            self.next.pack()
+            self.next.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
         self.stop_animation = False
@@ -184,24 +180,24 @@ class MyApp(object):
 
     def display_char(self, num):
         self.stop_animation = True
+        self.mainmenu.place_forget()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.display_char, num)
             return
         
-        self.mainmenu.pack_forget()
-        self.back.pack()
+        self.back.place(x=int(self.width/2), y=self.button_height, anchor="center")
         [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
     def display_characters(self):
         self.stop_animation = True
+        self.hide_buttons()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.display_characters)
             return
         
-        self.hide_buttons()
-        self.mainmenu.pack()
+        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./background.gif")
 
@@ -213,12 +209,12 @@ class MyApp(object):
     
     def display_history(self):
         self.stop_animation = True
+        self.hide_buttons()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.display_history)
             return
         
-        self.hide_buttons()
-        self.mainmenu.pack()
+        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./background.gif")
 
@@ -231,12 +227,12 @@ class MyApp(object):
 
     def rules(self):
         self.stop_animation = True
+        self.hide_buttons()
         if self.canvas.find_all():
             self.parent.after(self.pause, self.rules)
             return
         
-        self.hide_buttons()
-        self.mainmenu.pack()
+        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./background.gif")
 
