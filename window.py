@@ -124,11 +124,16 @@ class MyApp(object):
         self.update_gif(0, img, canvas_img, False)
         
     def roll_one(self):
+        if self.wishes == 0:
+            # add small image saying no more wishes
+            return
         self.stop_animation = True
         self.max_rolls = 1
         self.intro()
 
     def roll_ten(self):
+        if self.wishes == 0:
+            return
         self.stop_animation = True
         self.max_rolls = 10
         self.intro()
