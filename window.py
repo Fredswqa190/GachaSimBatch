@@ -157,7 +157,7 @@ class MyApp(object):
             return
 
         # character intro animation
-        [canvas_img, img] = self.animate("./"+str(num)+".gif")
+        [canvas_img, img] = self.animate("./character_images/"+str(num)+".gif")
         # character screen
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
@@ -174,7 +174,7 @@ class MyApp(object):
         else:
             self.next.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
+        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+"repeat.gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
@@ -186,7 +186,7 @@ class MyApp(object):
             return
         
         self.back.place(x=int(self.width/2), y=self.button_height, anchor="center")
-        [canvas_img, img] = self.animate("./"+str(num)+"repeat.gif")
+        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+"repeat.gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
