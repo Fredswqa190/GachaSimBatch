@@ -1,5 +1,6 @@
 from tkinter import *
 from PIL import Image, ImageTk
+import random
 
 class MyApp(object):
     def __init__(self, parent):
@@ -22,35 +23,53 @@ class MyApp(object):
         self.count_rolls = 0
 
         self.wishes = 90
-        self.characters = {1:0} # {1:0, 2:0, 3:0}
+        self.characters = {1:0, # 1 5-star 
+                            2:0, 3:0, # 2 4-star characters
+                            4:0, 5:0, 6:0, 7:0, # 4 3-star weapons
+                            8:0, 9:0, 10:0, 11:0} # 4 2-star weapons
 
         self.increment = int(self.width/7)
         self.button_height = self.height-100
+        self.button_background = "#A9E6E0"
+        self.button_text_color = "#DD3B0F"
+        self.button_text_font = "Comic Sans MS"
+
+        self.buttonW = int(self.width/100)
+        self.buttonH = int(self.height/500)
 
         self.roll1button = Button(text="1 Pull", \
-                                 width=20, height=2, command = self.roll_one)
+                                 width=self.buttonW, height=self.buttonH, command = self.roll_one,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.roll10button = Button(text="10 Pull", \
-                                 width=20, height=2, command = self.roll_ten)
+                                 width=self.buttonW, height=self.buttonH, command = self.roll_ten,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.displayChars = Button(text="Characters", \
-                                 width=20, height=2, command = self.display_characters)
+                                 width=self.buttonW, height=self.buttonH, command = self.display_characters,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.displayHist = Button(text="History", \
-                                 width=20, height=2, command = self.display_history)
+                                 width=self.buttonW, height=self.buttonH, command = self.display_history,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.rulesbutton = Button(text="Rules", \
-                                 width=20, height=2, command = self.rules)
+                                 width=self.buttonW, height=self.buttonH, command = self.rules,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.quitbutton = Button(text="Quit", \
-                                 width=20, height=2, command = self.quit)
+                                 width=self.buttonW, height=self.buttonH, command = self.quit,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.mainmenu = Button(text="Main Menu", \
-                                 width=20, height=2, command = self.main_menu)
+                                 width=self.buttonW, height=self.buttonH, command = self.main_menu,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         self.next = Button(text="Next", \
-                                 width=20, height=2, command = self.intro)
+                                 width=self.buttonW, height=self.buttonH, command = self.intro,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         self.back = Button(text="Back", \
-                                 width=20, height=2, command = self.display_characters)
+                                 width=self.buttonW, height=self.buttonH, command = self.display_characters,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         
         self.main_menu()
         
@@ -58,7 +77,14 @@ class MyApp(object):
         self.parent.destroy()
     
     def rand_num(self):
-        return 1
+        star = random.randint(1, 100)
+        if (star >= 1 and star <= 6):
+            return 1
+        elif (star >= 7 and star <= 26):
+            return random.randint(1, 2)
+        elif (star >= 27 and star <= 56):
+            return 3 + random.randint(1, 4)
+        return 7 + random.randint(1, 4)
     
     def hide_buttons(self):
         self.roll1button.place_forget()
@@ -146,7 +172,15 @@ class MyApp(object):
             return
         
         num = self.rand_num() # determines which intro and which character
-        [canvas_img, img] = self.animate("./intro1.gif")
+        star_num = num
+        if (num == 2 or num == 3):
+            star_num = 2
+        elif (num >= 4 and num <= 7):
+            star_num = 3
+        elif (num >= 8 and num <= 11):
+            star_num = 4
+            
+        [canvas_img, img] = self.animate("./intro"+str(star_num)+".gif")
         self.count_rolls += 1
         self.wishes -= 1
         self.characters[num] += 1
@@ -154,16 +188,19 @@ class MyApp(object):
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
 
-        self.character(num)
+        if (num <= 3):
+            self.character(num)
+        else:
+            self.repeat(num) # no intros for weapons
 
     def character(self, num):
         if self.canvas.find_all():
             self.parent.after(1, self.character, num)
             return
 
-        # character intro animation
+        # character intro animation info
         [canvas_img, img] = self.animate("./character_images/"+str(num)+".gif")
-        # character screen
+        # character intro
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
 
