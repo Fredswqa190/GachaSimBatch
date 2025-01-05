@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image, ImageTk
 import random
+import math
 
 class MyApp(object):
     def __init__(self, parent):
@@ -17,13 +18,17 @@ class MyApp(object):
         self.canvas.pack()
 
         self.pause = 1
-        self.started = True
+        self.started = False
+        self.first = True
+        self.time = 1200
+        self.timer = None
+        self.show = False
 
         self.error = "Can't wish anymore."
         self.errorID = None
+        self.introDescr = None
+        self.title = None
         self.stop_animation = False
-        self.max_rolls = 0
-        self.count_rolls = 0
 
         self.wishes = 90
         self.characters = {1:0, # 1 5-star 
@@ -68,9 +73,9 @@ class MyApp(object):
         self.mainmenu = Button(text="Main Menu", \
                                  width=self.buttonW, height=self.buttonH, command = self.main_menu,
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
-        self.next = Button(text="Next", \
-                                 width=self.buttonW, height=self.buttonH, command = self.intro,
-                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
+        self.start = Button(text="Start", \
+                                 width=int(1.5*self.buttonW), height=int(1.5*self.buttonH), command = self.start_game,
+                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 28, "bold"))
         
         self.main_menu()
         
@@ -82,7 +87,7 @@ class MyApp(object):
         if (star >= 1 and star <= 6):
             return 1
         elif (star >= 7 and star <= 26):
-            return random.randint(1, 2)
+            return random.randint(2, 3)
         elif (star >= 27 and star <= 56):
             return 3 + random.randint(1, 4)
         return 7 + random.randint(1, 4)
@@ -92,7 +97,6 @@ class MyApp(object):
         self.roll10button.place_forget()
         self.quitbutton.place_forget()
         self.mainmenu.place_forget()
-        self.next.place_forget()
         self.displayHist.place_forget()
         self.rulesbutton.place_forget()
 
@@ -130,10 +134,28 @@ class MyApp(object):
 
         return [canvas_img, img]
     
-    def start(self):
+    def update_time(self):
+        if self.time == 0:
+            return
+        self.time = self.time-1
+        self.parent.after(1000, self.update_time)
+        self.canvas.delete(self.timer)
+        if not self.show:
+            return
+        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
+
+    def start_game(self):
+        self.start.place_forget()
+        self.canvas.delete(self.title)
+        self.title = None
+        self.canvas.delete(self.introDescr)
+        self.introDescr = None
         self.show_buttons()
-        self.count_rolls = 0
         self.canvas.create_text(int(self.width/2), int(self.height/4), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 40), fill="white")
+        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
+        if self.first:
+            self.parent.after(1000, self.update_time)
+            self.first = False
 
     def main_menu(self):
         self.stop_animation = True
@@ -142,38 +164,42 @@ class MyApp(object):
             self.parent.after(self.pause, self.main_menu)
             return
         
+        self.show = True
         [canvas_img, img] = self.animate("./mainmenu.gif")
         
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
         if (self.started):
-            self.start()
-        #else:
-            # start message and button
+            self.start_game()
+        else:
+            self.start.place(x=int(self.width/2), y=self.button_height - int(self.button_height/5), anchor="center")
+            self.title = self.canvas.create_text(int(self.width/2), int(self.height/5), text="Welcome to GachaSim", font=(self.button_text_font, 100, "bold"), fill="red")
+            self.introDescr = self.canvas.create_text(int(self.width/2), int(2*self.height/5), text="You will have 90 wishes and 20 minutes to get a character", font=(self.button_text_font, 50, "bold"), fill="white")
+            self.started = True
         
     def remove(self):
         self.canvas.delete(self.errorID)
         self.errorID = None
 
     def roll_one(self):
-        if self.wishes == 0: # and timer ran out
+        if self.wishes == 0 or self.time == 0: # and timer ran out
             self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
             self.parent.after(3000, self.remove)
             return
         self.stop_animation = True
-        self.max_rolls = 1
+        self.show = False
         self.intro()
 
     def roll_ten(self):
-        if self.wishes == 0:
+        if self.wishes == 0 or self.time == 0:
             self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
             self.parent.after(3000, self.remove)
             return
         self.stop_animation = True
-        self.max_rolls = 10
-        self.intro()
-        
+        self.show = False
+        self.intro10()
+ 
     def intro(self):
         self.stop_animation = True
         self.hide_buttons()
@@ -191,7 +217,6 @@ class MyApp(object):
             star_num = 4
 
         [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
-        self.count_rolls += 1
         self.wishes -= 1
         self.characters[num] += 1
 
@@ -202,6 +227,64 @@ class MyApp(object):
             self.character(num)
         else:
             self.repeat(num) # no intros for weapons
+
+    def clearAll(self):
+        if self.stop_animation:
+            self.canvas.delete("all")
+            self.stop_animation = False
+            return
+        
+        self.parent.after(self.pause, self.clearAll)
+
+    def screen10(self, nums):
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.screen10, nums)
+            return
+        
+        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
+
+        img = Image.open("./screen10.jpg")
+        resize_img = img.resize((self.width, self.height))
+        for i in range(10):
+            num = nums[i]
+            img = Image.open("./still/"+str(num)+".jpg")
+            img = img.resize((int(self.width/11), int(self.height/2)))
+            resize_img.paste(img, (int(i*self.width/11) + 15 + i*15, int(self.height/4)), img.convert("RGBA")) # for transparency
+
+        img_tk = ImageTk.PhotoImage(resize_img)
+        self.canvas.create_image(0, 0, anchor=NW, image=img_tk)
+        self.canvas.image = img_tk
+
+        self.clearAll()
+
+    def intro10(self):
+        self.stop_animation = True
+        self.hide_buttons()
+        if self.canvas.find_all():
+            self.parent.after(self.pause, self.intro10)
+            return
+        
+        nums = []
+        for i in range(10):
+            num = self.rand_num() # determines which intro and which character
+            nums.append(num)
+            self.wishes -= 1
+            self.characters[num] += 1
+        
+        star_num = min(nums)
+        if (star_num == 2 or star_num == 3):
+            star_num = 2
+        elif (star_num >= 4 and star_num <= 7):
+            star_num = 3
+        elif (star_num >= 8 and star_num <= 11):
+            star_num = 4
+
+        [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
+
+        self.stop_animation = False
+        self.update_gif(0, img, canvas_img, True)
+
+        self.screen10(nums)
 
     def character(self, num):
         if self.canvas.find_all():
@@ -221,10 +304,7 @@ class MyApp(object):
             self.parent.after(self.pause, self.repeat, num)
             return
         
-        if self.max_rolls == self.count_rolls:
-            self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
-        else:
-            self.next.place(x=int(self.width/2), y=self.button_height, anchor="center")
+        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
         self.stop_animation = False
@@ -237,6 +317,7 @@ class MyApp(object):
             self.parent.after(self.pause, self.display_history)
             return
         
+        self.show = False
         self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./background.gif")
@@ -260,6 +341,7 @@ class MyApp(object):
             self.parent.after(self.pause, self.rules)
             return
         
+        self.show = False
         self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./background.gif")
