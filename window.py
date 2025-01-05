@@ -36,7 +36,7 @@ class MyApp(object):
                             4:"weapon1", 5:"weapon2", 6:"weapon3", 7:"weapon4", # 4 3-star weapons
                             8:"weapon5", 9:"weapon6", 10:"weapon7", 11:"weapon8"} # 4 2-star weapons
 
-        self.increment = int(self.width/7)
+        self.increment = int(self.width/6)
         self.button_height = self.height-100
         self.button_background = "#A9E6E0"
         self.button_text_color = "#DD3B0F"
@@ -51,10 +51,6 @@ class MyApp(object):
 
         self.roll10button = Button(text="10 Pull", \
                                  width=self.buttonW, height=self.buttonH, command = self.roll_ten,
-                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
-
-        self.displayChars = Button(text="Characters", \
-                                 width=self.buttonW, height=self.buttonH, command = self.display_characters,
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
 
         self.displayHist = Button(text="History", \
@@ -74,9 +70,6 @@ class MyApp(object):
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         self.next = Button(text="Next", \
                                  width=self.buttonW, height=self.buttonH, command = self.intro,
-                                 bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
-        self.back = Button(text="Back", \
-                                 width=self.buttonW, height=self.buttonH, command = self.display_characters,
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         
         self.main_menu()
@@ -100,18 +93,15 @@ class MyApp(object):
         self.quitbutton.place_forget()
         self.mainmenu.place_forget()
         self.next.place_forget()
-        self.displayChars.place_forget()
         self.displayHist.place_forget()
-        self.back.place_forget()
         self.rulesbutton.place_forget()
 
     def show_buttons(self):
         self.roll1button.place(x=self.increment, y=self.button_height, anchor="center")
         self.roll10button.place(x=2*self.increment, y=self.button_height, anchor="center")
-        self.displayChars.place(x=3*self.increment, y=self.button_height, anchor="center")
-        self.displayHist.place(x=4*self.increment, y=self.button_height, anchor="center")
-        self.rulesbutton.place(x=5*self.increment, y=self.button_height, anchor="center")
-        self.quitbutton.place(x=6*self.increment, y=self.button_height, anchor="center")
+        self.displayHist.place(x=3*self.increment, y=self.button_height, anchor="center")
+        self.rulesbutton.place(x=4*self.increment, y=self.button_height, anchor="center")
+        self.quitbutton.place(x=5*self.increment, y=self.button_height, anchor="center")
 
     def update_gif(self, frame, img, canvas_img, stop):
         if self.stop_animation:
@@ -237,35 +227,6 @@ class MyApp(object):
             self.next.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
         [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
-        self.stop_animation = False
-        self.update_gif(0, img, canvas_img, False)
-
-    def display_char(self, num):
-        self.stop_animation = True
-        self.mainmenu.place_forget()
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.display_char, num)
-            return
-        
-        self.back.place(x=int(self.width/2), y=self.button_height, anchor="center")
-        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
-        self.stop_animation = False
-        self.update_gif(0, img, canvas_img, False)
-
-    def display_characters(self):
-        self.stop_animation = True
-        self.hide_buttons()
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.display_characters)
-            return
-        
-        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
-
-        [canvas_img, img] = self.animate("./background.gif")
-
-        text = self.canvas.create_text(200, 100, text="character 1", font=('Helvetica', 20), fill="white", anchor=CENTER)
-        self.canvas.tag_bind(text, "<Button-1>", lambda event: self.display_char(1))
-
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
     
