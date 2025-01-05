@@ -17,6 +17,7 @@ class MyApp(object):
         self.canvas.pack()
 
         self.pause = 1
+        self.started = True
 
         self.error = "Can't wish anymore."
         self.errorID = None
@@ -139,6 +140,11 @@ class MyApp(object):
 
         return [canvas_img, img]
     
+    def start(self):
+        self.show_buttons()
+        self.count_rolls = 0
+        self.canvas.create_text(int(self.width/2), int(self.height/4), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 40), fill="white")
+
     def main_menu(self):
         self.stop_animation = True
         self.mainmenu.place_forget()
@@ -146,15 +152,15 @@ class MyApp(object):
             self.parent.after(self.pause, self.main_menu)
             return
         
-        self.show_buttons()
-
-        self.count_rolls = 0
-        
         [canvas_img, img] = self.animate("./mainmenu.gif")
-        self.canvas.create_text(0, 500, text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 20), fill="blue")
         
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
+
+        if (self.started):
+            self.start()
+        #else:
+            # start message and button
         
     def remove(self):
         self.canvas.delete(self.errorID)
