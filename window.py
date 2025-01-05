@@ -18,6 +18,8 @@ class MyApp(object):
 
         self.pause = 1
 
+        self.error = "Can't wish anymore."
+        self.errorID = None
         self.stop_animation = False
         self.max_rolls = 0
         self.count_rolls = 0
@@ -27,6 +29,11 @@ class MyApp(object):
                             2:0, 3:0, # 2 4-star characters
                             4:0, 5:0, 6:0, 7:0, # 4 3-star weapons
                             8:0, 9:0, 10:0, 11:0} # 4 2-star weapons
+
+        self.char_names = {1:"Sienna Ines", # 1 5-star 
+                            2:"Raziel Sera", 3:"Styx Ferryman", # 2 4-star characters
+                            4:"weapon1", 5:"weapon2", 6:"weapon3", 7:"weapon4", # 4 3-star weapons
+                            8:"weapon5", 9:"weapon6", 10:"weapon7", 11:"weapon8"} # 4 2-star weapons
 
         self.increment = int(self.width/7)
         self.button_height = self.height-100
@@ -144,14 +151,19 @@ class MyApp(object):
         self.count_rolls = 0
         
         [canvas_img, img] = self.animate("./mainmenu.gif")
-        self.canvas.create_text(0, 500, text="Remaining wishes: "+str(self.wishes), font=('Helvetica', 20), fill="blue")
+        self.canvas.create_text(0, 500, text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 20), fill="blue")
         
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
         
+    def remove(self):
+        self.canvas.delete(self.errorID)
+        self.errorID = None
+
     def roll_one(self):
-        if self.wishes == 0:
-            # add small image saying no more wishes
+        if self.wishes == 0: # and timer ran out
+            self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
+            self.parent.after(3000, self.remove)
             return
         self.stop_animation = True
         self.max_rolls = 1
@@ -159,6 +171,8 @@ class MyApp(object):
 
     def roll_ten(self):
         if self.wishes == 0:
+            self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
+            self.parent.after(3000, self.remove)
             return
         self.stop_animation = True
         self.max_rolls = 10
@@ -179,8 +193,8 @@ class MyApp(object):
             star_num = 3
         elif (num >= 8 and num <= 11):
             star_num = 4
-            
-        [canvas_img, img] = self.animate("./intro"+str(star_num)+".gif")
+
+        [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
         self.count_rolls += 1
         self.wishes -= 1
         self.characters[num] += 1
@@ -216,7 +230,7 @@ class MyApp(object):
         else:
             self.next.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+"repeat.gif")
+        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
@@ -228,7 +242,7 @@ class MyApp(object):
             return
         
         self.back.place(x=int(self.width/2), y=self.button_height, anchor="center")
-        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+"repeat.gif")
+        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
@@ -260,9 +274,14 @@ class MyApp(object):
 
         [canvas_img, img] = self.animate("./background.gif")
 
-        for i in range(1):
+        self.canvas.create_text(int(self.width/3), int(self.height/11), text="Characters", font=(self.button_text_font, 40, "bold"), fill="black", anchor=CENTER)
+        self.canvas.create_text(2*int(self.width/3), int(self.height/11), text="Weapons", font=(self.button_text_font, 40, "bold"), fill="black", anchor=CENTER)
+        for i in range(3):
             num = self.characters[i+1]
-            self.canvas.create_text(200, (i+1)*100, text="character "+str(i+1)+": "+str(num), font=('Helvetica', 20), fill="white", anchor=CENTER)
+            self.canvas.create_text(int(self.width/3), (i+2)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 20), fill="white", anchor=CENTER)
+        for i in range(3,11):
+            num = self.characters[i+1]
+            self.canvas.create_text(2*int(self.width/3), (i-1)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 20), fill="white", anchor=CENTER)
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
