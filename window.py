@@ -18,7 +18,6 @@ class MyApp(object):
         self.canvas.pack()
 
         self.pause = 1
-        self.started = False
         self.first = True
         self.time = 1200
         self.timer = None
@@ -27,7 +26,6 @@ class MyApp(object):
         self.error = "Can't wish anymore."
         self.errorID = None
         self.introDescr = None
-        self.title = None
         self.stop_animation = False
 
         self.wishes = 90
@@ -74,10 +72,10 @@ class MyApp(object):
                                  width=self.buttonW, height=self.buttonH, command = self.main_menu,
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 14, "bold"))
         self.start = Button(text="Start", \
-                                 width=int(1.5*self.buttonW), height=int(1.5*self.buttonH), command = self.start_game,
+                                 width=int(1.5*self.buttonW), height=int(1.5*self.buttonH), command = self.main_menu,
                                  bg=self.button_background, fg=self.button_text_color, font=(self.button_text_font, 28, "bold"))
         
-        self.main_menu()
+        self.start_game()
         
     def quit(self):
         self.parent.destroy()
@@ -145,17 +143,17 @@ class MyApp(object):
         self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
 
     def start_game(self):
-        self.start.place_forget()
-        self.canvas.delete(self.title)
-        self.title = None
-        self.canvas.delete(self.introDescr)
-        self.introDescr = None
-        self.show_buttons()
-        self.canvas.create_text(int(self.width/2), int(self.height/4), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 40), fill="white")
-        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
-        if self.first:
-            self.parent.after(1000, self.update_time)
-            self.first = False
+        img = Image.open("./screen10.jpg")
+        resize_img = img.resize((self.width, self.height))
+
+        img_tk = ImageTk.PhotoImage(resize_img)
+        self.canvas.create_image(0, 0, anchor=NW, image=img_tk)
+        self.canvas.image = img_tk
+
+        self.start.place(x=int(self.width/2), y=self.button_height - int(self.button_height/5), anchor="center")
+        self.introDescr = self.canvas.create_text(int(self.width/2), int(2*self.height/5), text="You will have 90 wishes and 20 minutes to get a character", font=(self.button_text_font, 50, "bold"), fill="white")
+
+        self.clearAll()
 
     def main_menu(self):
         self.stop_animation = True
@@ -170,13 +168,16 @@ class MyApp(object):
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
 
-        if (self.started):
-            self.start_game()
-        else:
-            self.start.place(x=int(self.width/2), y=self.button_height - int(self.button_height/5), anchor="center")
-            self.title = self.canvas.create_text(int(self.width/2), int(self.height/5), text="Welcome to GachaSim", font=(self.button_text_font, 100, "bold"), fill="red")
-            self.introDescr = self.canvas.create_text(int(self.width/2), int(2*self.height/5), text="You will have 90 wishes and 20 minutes to get a character", font=(self.button_text_font, 50, "bold"), fill="white")
-            self.started = True
+        self.start.place_forget()
+        self.canvas.delete(self.introDescr)
+        self.introDescr = None
+
+        self.show_buttons()
+        self.canvas.create_text(int(self.width/2), int(self.height/4), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 40), fill="white")
+        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
+        if self.first:
+            self.parent.after(1000, self.update_time)
+            self.first = False
         
     def remove(self):
         self.canvas.delete(self.errorID)
