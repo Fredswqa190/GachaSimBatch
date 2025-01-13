@@ -1,2 +1,2 @@
 # GachaSim
-m
+Run using run.bat.
