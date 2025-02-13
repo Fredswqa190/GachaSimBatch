@@ -2,6 +2,17 @@ from tkinter import *
 from PIL import Image, ImageTk
 import random
 import math
+import sys
+import os
+ 
+# Adjust path to resources (like image) for PyInstaller
+def resource_path(relative_path):
+    try:
+        # PyInstaller creates a temporary folder _MEIPASS for bundled apps
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class MyApp(object):
     def __init__(self, parent):
@@ -27,8 +38,10 @@ class MyApp(object):
         self.errorID = None
         self.introDescr = None
         self.stop_animation = False
+        self.NoOne = None
+        self.none = "Currently not available"
 
-        self.wishes = 90
+        self.wishes = 100
         self.characters = {1:0, # 1 5-star 
                             2:0, 3:0, # 2 4-star characters
                             4:0, 5:0, 6:0, 7:0, # 4 3-star weapons
@@ -36,13 +49,14 @@ class MyApp(object):
 
         self.char_names = {1:"Sienna Ines", # 1 5-star 
                             2:"Raziel Sera", 3:"Styx Ferryman", # 2 4-star characters
-                            4:"weapon1", 5:"weapon2", 6:"weapon3", 7:"weapon4", # 4 3-star weapons
-                            8:"weapon5", 9:"weapon6", 10:"weapon7", 11:"weapon8"} # 4 2-star weapons
+                            4:"Lost Sea of Polaris", 5:"Hydra of Lerna", 6:"Seraphim's Tome", 7:"Beacon of Splendor", # 4 3-star weapons
+                            8:"Whiplash", 9:"Swordfish", 10:"Cerulean", 11:"Charybdis"} # 4 2-star weapons
 
         self.increment = int(self.width/6)
         self.button_height = self.height-100
-        self.button_background = "#A9E6E0"
-        self.button_text_color = "#DD3B0F"
+        self.button_background = "white"
+        self.button_text_color = "#047DA1"
+        self.header_text_color = "#1DEAEA"
         self.button_text_font = "Comic Sans MS"
 
         self.buttonW = int(self.width/100)
@@ -82,11 +96,11 @@ class MyApp(object):
     
     def rand_num(self):
         star = random.randint(1, 100)
-        if (star >= 1 and star <= 6):
+        if (star >= 1 and star <= 2):
             return 1
-        elif (star >= 7 and star <= 26):
+        elif (star >= 3 and star <= 12):
             return random.randint(2, 3)
-        elif (star >= 27 and star <= 56):
+        elif (star >= 13 and star <= 50):
             return 3 + random.randint(1, 4)
         return 7 + random.randint(1, 4)
     
@@ -121,7 +135,7 @@ class MyApp(object):
             self.canvas.delete("all")
             self.stop_animation = False
             return
-        self.parent.after(33, self.update_gif, (frame + 1) % img.n_frames, img, canvas_img, stop) # around 30 fps
+        self.parent.after(1, self.update_gif, (frame + 1) % img.n_frames, img, canvas_img, stop) # around 30 fps
 
     def animate(self, pathname):
         img = Image.open(pathname)
@@ -140,10 +154,10 @@ class MyApp(object):
         self.canvas.delete(self.timer)
         if not self.show:
             return
-        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
+        self.timer = self.canvas.create_text(int(17*self.width/32), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 20), fill="black")
 
     def start_game(self):
-        img = Image.open("./screen10.jpg")
+        img = Image.open(resource_path("start.png"))
         resize_img = img.resize((self.width, self.height))
 
         img_tk = ImageTk.PhotoImage(resize_img)
@@ -151,7 +165,7 @@ class MyApp(object):
         self.canvas.image = img_tk
 
         self.start.place(x=int(self.width/2), y=self.button_height - int(self.button_height/5), anchor="center")
-        self.introDescr = self.canvas.create_text(int(self.width/2), int(2*self.height/5), text="You will have 90 wishes and 20 minutes to get a character", font=(self.button_text_font, 50, "bold"), fill="white")
+        self.introDescr = self.canvas.create_text(int(self.width/2), int(3*self.height/10), text="You will have 100 wishes and 20 minutes to get a character", font=(self.button_text_font, 25, "bold"), fill="black")
 
         self.clearAll()
 
@@ -163,7 +177,7 @@ class MyApp(object):
             return
         
         self.show = True
-        [canvas_img, img] = self.animate("./mainmenu.gif")
+        [canvas_img, img] = self.animate(resource_path("mainmenu.gif"))
         
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
@@ -173,8 +187,8 @@ class MyApp(object):
         self.introDescr = None
 
         self.show_buttons()
-        self.canvas.create_text(int(self.width/2), int(self.height/4), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 40), fill="white")
-        self.timer = self.canvas.create_text(int(self.width/2), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 40), fill="white")
+        self.canvas.create_text(int(self.width/2), int(7*self.height/16), text="Remaining wishes: "+str(self.wishes), font=(self.button_text_font, 20), fill="black")
+        self.timer = self.canvas.create_text(int(17*self.width/32), int(3*self.height/8), text="Timer: "+str(math.floor(self.time/60))+" minutes "+str(self.time%60)+" seconds", font=(self.button_text_font, 20), fill="black")
         if self.first:
             self.parent.after(1000, self.update_time)
             self.first = False
@@ -183,51 +197,58 @@ class MyApp(object):
         self.canvas.delete(self.errorID)
         self.errorID = None
 
+        self.canvas.delete(self.NoOne)
+        self.NoOne = None
+
     def roll_one(self):
-        if self.wishes == 0 or self.time == 0: # and timer ran out
-            self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
-            self.parent.after(3000, self.remove)
-            return
-        self.stop_animation = True
-        self.show = False
-        self.intro()
+        self.NoOne = self.canvas.create_text(int(self.width/2), 100, text=self.none, font=(self.button_text_font, 25, "bold"), fill="red")
+        self.parent.after(3000, self.remove)
+        return
+    
+        # if self.wishes == 0 or self.time == 0: # and timer ran out
+        #     self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
+        #     self.parent.after(3000, self.remove)
+        #     return
+        # self.stop_animation = True
+        # self.show = False
+        # self.intro()
 
     def roll_ten(self):
         if self.wishes == 0 or self.time == 0:
-            self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 50, "bold"), fill="red")
+            self.errorID = self.canvas.create_text(int(self.width/2), 100, text=self.error, font=(self.button_text_font, 25, "bold"), fill="red")
             self.parent.after(3000, self.remove)
             return
         self.stop_animation = True
         self.show = False
         self.intro10()
  
-    def intro(self):
-        self.stop_animation = True
-        self.hide_buttons()
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.intro)
-            return
+    # def intro(self):
+    #     self.stop_animation = True
+    #     self.hide_buttons()
+    #     if self.canvas.find_all():
+    #         self.parent.after(self.pause, self.intro)
+    #         return
         
-        num = self.rand_num() # determines which intro and which character
-        star_num = num
-        if (num == 2 or num == 3):
-            star_num = 2
-        elif (num >= 4 and num <= 7):
-            star_num = 3
-        elif (num >= 8 and num <= 11):
-            star_num = 4
+    #     num = self.rand_num() # determines which intro and which character
+    #     star_num = num
+    #     if (num == 2 or num == 3):
+    #         star_num = 2
+    #     elif (num >= 4 and num <= 7):
+    #         star_num = 3
+    #     elif (num >= 8 and num <= 11):
+    #         star_num = 4
 
-        [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
-        self.wishes -= 1
-        self.characters[num] += 1
+    #     [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
+    #     self.wishes -= 1
+    #     self.characters[num] += 1
 
-        self.stop_animation = False
-        self.update_gif(0, img, canvas_img, True)
+    #     self.stop_animation = False
+    #     self.update_gif(0, img, canvas_img, True)
 
-        if (num <= 3):
-            self.character(num)
-        else:
-            self.repeat(num) # no intros for weapons
+    #     if (num <= 3):
+    #         self.character(num)
+    #     else:
+    #         self.repeat(num) # no intros for weapons
 
     def clearAll(self):
         if self.stop_animation:
@@ -244,11 +265,11 @@ class MyApp(object):
         
         self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        img = Image.open("./screen10.jpg")
+        img = Image.open(resource_path("screen10.jpg"))
         resize_img = img.resize((self.width, self.height))
         for i in range(10):
             num = nums[i]
-            img = Image.open("./still/"+str(num)+".jpg")
+            img = Image.open(resource_path(str(num)+".jpg"))
             img = img.resize((int(self.width/11), int(self.height/2)))
             resize_img.paste(img, (int(i*self.width/11) + 15 + i*15, int(self.height/4)), img.convert("RGBA")) # for transparency
 
@@ -272,44 +293,44 @@ class MyApp(object):
             self.wishes -= 1
             self.characters[num] += 1
         
-        star_num = min(nums)
-        if (star_num == 2 or star_num == 3):
-            star_num = 2
-        elif (star_num >= 4 and star_num <= 7):
-            star_num = 3
-        elif (star_num >= 8 and star_num <= 11):
-            star_num = 4
+        # star_num = min(nums)
+        # if (star_num == 2 or star_num == 3):
+        #     star_num = 2
+        # elif (star_num >= 4 and star_num <= 7):
+        #     star_num = 3
+        # elif (star_num >= 8 and star_num <= 11):
+        #     star_num = 4
 
-        [canvas_img, img] = self.animate("./intros/"+str(star_num)+".gif")
+        [canvas_img, img] = self.animate(resource_path("wish.gif"))
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, True)
 
         self.screen10(nums)
 
-    def character(self, num):
-        if self.canvas.find_all():
-            self.parent.after(1, self.character, num)
-            return
+    # def character(self, num):
+    #     if self.canvas.find_all():
+    #         self.parent.after(1, self.character, num)
+    #         return
 
-        # character intro animation info
-        [canvas_img, img] = self.animate("./character_images/"+str(num)+".gif")
-        # character intro
-        self.stop_animation = False
-        self.update_gif(0, img, canvas_img, True)
+    #     # character intro animation info
+    #     [canvas_img, img] = self.animate("./character_images/"+str(num)+".gif")
+    #     # character intro
+    #     self.stop_animation = False
+    #     self.update_gif(0, img, canvas_img, True)
 
-        self.repeat(num)
+    #     self.repeat(num)
 
-    def repeat(self, num):
-        if self.canvas.find_all():
-            self.parent.after(self.pause, self.repeat, num)
-            return
+    # def repeat(self, num):
+    #     if self.canvas.find_all():
+    #         self.parent.after(self.pause, self.repeat, num)
+    #         return
         
-        self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
+    #     self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
-        self.stop_animation = False
-        self.update_gif(0, img, canvas_img, False)
+    #     [canvas_img, img] = self.animate("./repeat_images/"+str(num)+".gif")
+    #     self.stop_animation = False
+    #     self.update_gif(0, img, canvas_img, False)
     
     def display_history(self):
         self.stop_animation = True
@@ -321,16 +342,16 @@ class MyApp(object):
         self.show = False
         self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        [canvas_img, img] = self.animate("./background.gif")
+        [canvas_img, img] = self.animate(resource_path("background.gif"))
 
-        self.canvas.create_text(int(self.width/3), int(self.height/11), text="Characters", font=(self.button_text_font, 40, "bold"), fill="black", anchor=CENTER)
-        self.canvas.create_text(2*int(self.width/3), int(self.height/11), text="Weapons", font=(self.button_text_font, 40, "bold"), fill="black", anchor=CENTER)
+        self.canvas.create_text(int(self.width/3), int(self.height/11), text="Characters", font=(self.button_text_font, 20, "bold"), fill=self.header_text_color, anchor=CENTER)
+        self.canvas.create_text(2*int(self.width/3), int(self.height/11), text="Weapons", font=(self.button_text_font, 20, "bold"), fill=self.header_text_color, anchor=CENTER)
         for i in range(3):
             num = self.characters[i+1]
-            self.canvas.create_text(int(self.width/3), (i+2)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 20), fill="white", anchor=CENTER)
+            self.canvas.create_text(int(self.width/3), (i+2)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 10), fill="white", anchor=CENTER)
         for i in range(3,11):
             num = self.characters[i+1]
-            self.canvas.create_text(2*int(self.width/3), (i-1)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 20), fill="white", anchor=CENTER)
+            self.canvas.create_text(2*int(self.width/3), (i-1)*(int(self.height/11)), text=self.char_names[i+1]+": "+str(num), font=(self.button_text_font, 10), fill="white", anchor=CENTER)
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
@@ -345,9 +366,18 @@ class MyApp(object):
         self.show = False
         self.mainmenu.place(x=int(self.width/2), y=self.button_height, anchor="center")
 
-        [canvas_img, img] = self.animate("./background.gif")
+        [canvas_img, img] = self.animate(resource_path("background.gif"))
 
         # Rules
+        self.canvas.create_text(int(self.width/2), int(self.height/5), text="Rate Rules and Details:", font=(self.button_text_font, 20), fill=self.header_text_color)
+        self.canvas.create_text(int(self.width/2), int(3*self.height/10), text="Basic rate of summoning 5☆ characters: 2% ", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(7*self.height/20), text="Basic rate of summoning 4☆ characters: 10% ", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(8*self.height/20), text="Basic rate of summoning 3☆ weapons: 38%", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(9*self.height/20), text="Basic rate of summoning 2☆ weapons: 50%", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(12*self.height/20), text="Time-limited summoning event has begun. During the event, there will ", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(13*self.height/20), text="be no rate-ups, no guarantee counters, or a pity system that affect the ", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(14*self.height/20), text="rates; all base rates will be permanent for the duration of the event. The ", font=(self.button_text_font, 15), fill="white")
+        self.canvas.create_text(int(self.width/2), int(15*self.height/20), text="basic rate applies to all characters. Each Summon x10 will consume 10,000 gems.", font=(self.button_text_font, 15), fill="white")
 
         self.stop_animation = False
         self.update_gif(0, img, canvas_img, False)
