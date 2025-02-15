@@ -57,7 +57,7 @@ const Gacha = () => {
       setResults([num]);
       setView('results');
       setLoading(false);
-    }, 2000); // Simulate animation delay
+    }, 4800); 
   };
 
   const rollTen = () => {
@@ -78,7 +78,7 @@ const Gacha = () => {
       setResults(nums);
       setView('results');
       setLoading(false);
-    }, 2000); // Simulate animation delay
+    }, 4800); 
   };
 
   const displayHistory = () => {
@@ -109,26 +109,25 @@ const Gacha = () => {
   return (
     <div className="container">
       <main>
-        
-        {view === 'start' && (
+        {!loading && view === 'start' && (
           <>
             <div className="full-size-image">
               <Image src="/start.png" alt="Start Screen" layout="fill" objectFit="cover" />
             </div>
             <div className="content">
-            <h1>Gacha Simulator</h1>
+              <h1>Gacha Simulator</h1>
               <p>You will have 100 wishes and 20 minutes to get a character</p>
               <button className="btn" onClick={startGame}>Start</button>
             </div>
           </>
         )}
-        {view === 'main' && (
+        {!loading && view === 'main' && (
           <>
             <div className="full-size-image">
               <Image src="/mainmenu.gif" alt="Main Menu" layout="fill" objectFit="cover" unoptimized />
             </div>
             <div className="content">
-            <h1>Gacha Simulator</h1>
+              <h1>Gacha Simulator</h1>
               <p>You will have 100 wishes and 20 minutes to get a character</p>
               <div className="buttons">
                 <button className="btn" onClick={rollOne}>1 Pull</button>
@@ -143,7 +142,7 @@ const Gacha = () => {
             </div>
           </>
         )}
-        {view === 'history' && (
+        {!loading && view === 'history' && (
           <>
             <div className="full-size-image">
               <Image src="/background.gif" alt="Background" layout="fill" objectFit="cover" unoptimized />
@@ -168,7 +167,7 @@ const Gacha = () => {
             </div>
           </>
         )}
-        {view === 'rules' && (
+        {!loading && view === 'rules' && (
           <>
             <div className="full-size-image">
               <Image src="/background.gif" alt="Background" layout="fill" objectFit="cover" unoptimized />
@@ -187,7 +186,7 @@ const Gacha = () => {
             </div>
           </>
         )}
-        {view === 'results' && (
+        {!loading && view === 'results' && (
           <>
             <div className="content">
               <h2>Results</h2>
@@ -203,7 +202,11 @@ const Gacha = () => {
             </div>
           </>
         )}
-        {loading && <div className="loading">Loading...</div>}
+        {loading && (
+          <div className="loading">
+            <Image src="/wish.gif" alt="Loading..." layout="fill" objectFit="cover" />
+          </div>
+        )}
       </main>
       <style jsx>{`
         .container {
@@ -222,13 +225,13 @@ const Gacha = () => {
           background: rgba(255, 255, 255, 0.8);
           padding: 20px;
           border-radius: 10px;
-          color: black; /* Set text color to black */
-          margin-top: -20px; /* Move content up by 20px */
+          color: black; 
+          margin-top: -20px; 
         }
         .content h1 {
-          color: black; /* Set h1 text color to black */
-          font-size: 3em; /* Increase font size */
-          margin-top: -20px; /* Move h1 up by 20px */
+          color: black; 
+          font-size: 3em; 
+          margin-top: -20px; 
         }
         .buttons {
           margin: 20px;
@@ -260,12 +263,11 @@ const Gacha = () => {
         }
         .loading {
           position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-size: 24px;
-          font-weight: bold;
-          color: black;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
         }
         .full-size-image {
           position: absolute;
